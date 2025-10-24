@@ -226,3 +226,6 @@ backend/*.env
 # OS generated files
 .Spotlight-V100
 .Trashes
+
+# Claude Code local settings
+.claude/

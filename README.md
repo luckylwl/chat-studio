@@ -226,8 +226,8 @@ python main.py
 
 1. **克隆项目**
    ```bash
-   git clone https://github.com/your-username/ai-chat-studio.git
-   cd ai-chat-studio
+   git clone https://github.com/luckylwl/chat-studio.git
+   cd chat-studio
    ```
 
 2. **安装依赖**
@@ -613,7 +613,7 @@ ai-chat-studio/
 
 ### 报告问题
 
-使用 [GitHub Issues](https://github.com/your-username/ai-chat-studio/issues) 报告 Bug 或提出功能建议。
+使用 [GitHub Issues](https://github.com/luckylwl/chat-studio/issues) 报告 Bug 或提出功能建议。
 
 ### 代码贡献者
 
@@ -663,9 +663,9 @@ ai-chat-studio/
 
 ## 📞 联系我们
 
-- **项目主页**: [GitHub Repository](https://github.com/your-username/ai-chat-studio)
-- **问题反馈**: [GitHub Issues](https://github.com/your-username/ai-chat-studio/issues)
-- **讨论交流**: [GitHub Discussions](https://github.com/your-username/ai-chat-studio/discussions)
+- **项目主页**: [GitHub Repository](https://github.com/luckylwl/chat-studio)
+- **问题反馈**: [GitHub Issues](https://github.com/luckylwl/chat-studio/issues)
+- **讨论交流**: [GitHub Discussions](https://github.com/luckylwl/chat-studio/discussions)
 
 ---
 
@@ -777,7 +777,7 @@ ai-chat-studio/
 
 ## ⭐ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=your-username/ai-chat-studio&type=Date)](https://star-history.com/#your-username/ai-chat-studio&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=luckylwl/chat-studio&type=Date)](https://star-history.com/#luckylwl/chat-studio&Date)
 
 ---
 
