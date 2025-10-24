@@ -1,0 +1,442 @@
+/* ============================================
+   无障碍访问样式
+   ============================================ */
+
+/* 屏幕阅读器专用 - 视觉隐藏但对屏幕阅读器可见 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* 当元素获得焦点时显示 */
+.sr-only:focus,
+.sr-only:active {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* ============================================
+   高对比度模式
+   ============================================ */
+.high-contrast {
+  /* 文字对比度增强 */
+  --text-contrast: 1.2;
+
+  /* 背景和前景色 */
+  --bg-primary: #000000;
+  --bg-secondary: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-secondary: #e0e0e0;
+
+  /* 链接颜色 */
+  --link-color: #4da6ff;
+  --link-hover: #80bfff;
+
+  /* 边框加强 */
+  --border-width: 2px;
+  --border-color: #ffffff;
+}
+
+.high-contrast * {
+  border-width: var(--border-width, 1px);
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+.high-contrast a {
+  text-decoration: underline;
+  color: var(--link-color);
+}
+
+.high-contrast button {
+  border: 2px solid var(--border-color);
+}
+
+/* ============================================
+   焦点指示器样式
+   ============================================ */
+
+/* 默认焦点样式 */
+[data-focus-style="default"] *:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* 增强焦点样式 */
+[data-focus-style="enhanced"] *:focus {
+  outline: 3px solid #3b82f6;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+}
+
+/* 高可见性焦点样式 */
+[data-focus-style="high-visibility"] *:focus {
+  outline: 4px solid #ffff00;
+  outline-offset: 4px;
+  box-shadow: 0 0 0 8px rgba(255, 255, 0, 0.5), 0 0 0 12px rgba(0, 0, 0, 0.3);
+  background-color: rgba(255, 255, 0, 0.1);
+}
+
+/* 焦点不可见元素 */
+[data-focus-style] *:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ============================================
+   减少动画效果
+   ============================================ */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* 保留必要的状态变化 */
+.reduce-motion *:hover,
+.reduce-motion *:focus {
+  transition: background-color 0.01ms, color 0.01ms, border-color 0.01ms;
+}
+
+/* ============================================
+   色盲模式滤镜
+   ============================================ */
+
+/* 红绿色盲（绿色弱） - Deuteranopia */
+[data-colorblind-mode="deuteranopia"] {
+  filter:
+    url('data:image/svg+xml,\
+      <svg xmlns="http://www.w3.org/2000/svg">\
+        <filter id="deuteranopia">\
+          <feColorMatrix type="matrix" values="\
+            0.625 0.375 0     0 0 \
+            0.7   0.3   0     0 0 \
+            0     0.3   0.7   0 0 \
+            0     0     0     1 0"/>\
+        </filter>\
+      </svg>#deuteranopia');
+}
+
+/* 红绿色盲（红色弱） - Protanopia */
+[data-colorblind-mode="protanopia"] {
+  filter:
+    url('data:image/svg+xml,\
+      <svg xmlns="http://www.w3.org/2000/svg">\
+        <filter id="protanopia">\
+          <feColorMatrix type="matrix" values="\
+            0.567 0.433 0     0 0 \
+            0.558 0.442 0     0 0 \
+            0     0.242 0.758 0 0 \
+            0     0     0     1 0"/>\
+        </filter>\
+      </svg>#protanopia');
+}
+
+/* 黄蓝色盲 - Tritanopia */
+[data-colorblind-mode="tritanopia"] {
+  filter:
+    url('data:image/svg+xml,\
+      <svg xmlns="http://www.w3.org/2000/svg">\
+        <filter id="tritanopia">\
+          <feColorMatrix type="matrix" values="\
+            0.95  0.05  0     0 0 \
+            0     0.433 0.567 0 0 \
+            0     0.475 0.525 0 0 \
+            0     0     0     1 0"/>\
+        </filter>\
+      </svg>#tritanopia');
+}
+
+/* ============================================
+   字体和行高调整
+   ============================================ */
+
+/* 字体大小变量会在 JavaScript 中动态设置 */
+:root {
+  --line-height: 1.6;
+}
+
+body {
+  line-height: var(--line-height);
+}
+
+/* 确保文字可缩放 */
+* {
+  max-width: 100%;
+}
+
+p, li, td, th {
+  line-height: var(--line-height);
+}
+
+/* ============================================
+   键盘导航增强
+   ============================================ */
+
+/* 可聚焦元素高亮 */
+a, button, input, select, textarea, [tabindex]:not([tabindex="-1"]) {
+  position: relative;
+}
+
+/* 键盘导航模式下的额外提示 */
+body.keyboard-navigation *:focus::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px dashed #3b82f6;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* ============================================
+   跳转链接样式增强
+   ============================================ */
+.skip-links a {
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.skip-links a:focus {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ============================================
+   语义化区域标识
+   ============================================ */
+
+/* 为主要区域添加视觉分隔（仅在高对比度模式） */
+.high-contrast main,
+.high-contrast nav,
+.high-contrast aside,
+.high-contrast header,
+.high-contrast footer {
+  border: 2px solid var(--border-color);
+  margin: 8px 0;
+}
+
+/* ============================================
+   表单可访问性增强
+   ============================================ */
+
+/* 错误状态明显化 */
+input:invalid,
+select:invalid,
+textarea:invalid {
+  border-color: #ef4444;
+  border-width: 2px;
+}
+
+input:invalid:focus,
+select:invalid:focus,
+textarea:invalid:focus {
+  outline-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+}
+
+/* 必填字段标识 */
+input:required,
+select:required,
+textarea:required {
+  border-left-width: 4px;
+  border-left-color: #3b82f6;
+}
+
+/* ============================================
+   触摸目标尺寸优化
+   ============================================ */
+
+/* 确保所有可点击元素至少 44x44px (WCAG 2.1 AA) */
+button,
+a,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+[role="button"],
+[onclick] {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================
+   屏幕阅读器优化
+   ============================================ */
+
+/* 为装饰性图标隐藏 */
+[aria-hidden="true"] {
+  speak: none;
+}
+
+/* 强制屏幕阅读器读取 */
+[aria-live="polite"],
+[aria-live="assertive"] {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* ============================================
+   响应式文本
+   ============================================ */
+
+/* 防止文字溢出 */
+* {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* 长单词断行 */
+.break-word {
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* ============================================
+   打印样式优化
+   ============================================ */
+@media print {
+  /* 确保打印时可访问性样式仍然生效 */
+  .sr-only {
+    position: static;
+    width: auto;
+    height: auto;
+  }
+
+  /* 移除背景色和阴影以节省墨水 */
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* 显示链接 URL */
+  a[href]::after {
+    content: " (" attr(href) ")";
+  }
+}
+
+/* ============================================
+   暗色模式无障碍优化
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  :root:not(.high-contrast) {
+    /* 确保暗色模式下的对比度 */
+    --text-primary: #e5e5e5;
+    --text-secondary: #a3a3a3;
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2a2a2a;
+  }
+}
+
+/* ============================================
+   用户偏好设置响应
+   ============================================ */
+
+/* 系统级减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 系统级高对比度偏好 */
+@media (prefers-contrast: high) {
+  :root {
+    --border-width: 2px;
+    filter: contrast(1.2);
+  }
+}
+
+/* ============================================
+   辅助工具提示
+   ============================================ */
+
+/* 工具提示可访问性 */
+[role="tooltip"] {
+  position: absolute;
+  z-index: 9999;
+  padding: 8px 12px;
+  background: #1f2937;
+  color: #ffffff;
+  border-radius: 6px;
+  font-size: 14px;
+  max-width: 300px;
+  word-wrap: break-word;
+}
+
+[role="tooltip"]::before {
+  content: '';
+  position: absolute;
+  border: 6px solid transparent;
+}
+
+/* ============================================
+   实用类
+   ============================================ */
+
+/* 仅在视觉上隐藏 */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border-width: 0 !important;
+}
+
+/* 仅对屏幕阅读器隐藏 */
+.sr-hide {
+  speak: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 可跳过内容 */
+.skip-content {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-content:focus {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  z-index: 999999;
+  padding: 1rem;
+  background: white;
+  border: 2px solid #3b82f6;
+}

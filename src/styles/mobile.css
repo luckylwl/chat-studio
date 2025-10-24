@@ -1,0 +1,493 @@
+/**
+ * 移动端优化样式
+ *
+ * 功能:
+ * - iOS 安全区域支持
+ * - 触摸优化
+ * - 移动端字体调整
+ * - 滚动优化
+ * - 视觉反馈
+ */
+
+/* ==================== CSS 变量 ==================== */
+:root {
+  /* 安全区域 (iOS notch) */
+  --sat: env(safe-area-inset-top);
+  --sar: env(safe-area-inset-right);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+
+  /* 触摸目标最小尺寸 */
+  --touch-target-min: 44px;
+
+  /* 移动端字体大小 */
+  --font-size-mobile-xs: 12px;
+  --font-size-mobile-sm: 14px;
+  --font-size-mobile-base: 16px;
+  --font-size-mobile-lg: 18px;
+  --font-size-mobile-xl: 20px;
+}
+
+/* ==================== 全局移动端优化 ==================== */
+
+/* 禁用文本选择 (改善滑动体验) */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  /* 允许特定元素文本选择 */
+  input,
+  textarea,
+  [contenteditable],
+  .selectable {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
+
+/* 移动端平滑滚动 */
+@media (max-width: 768px) {
+  html {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body {
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
+  }
+}
+
+/* ==================== iOS 安全区域支持 ==================== */
+
+/* 顶部安全区域 */
+.safe-top {
+  padding-top: var(--sat);
+}
+
+/* 右侧安全区域 */
+.safe-right {
+  padding-right: var(--sar);
+}
+
+/* 底部安全区域 */
+.safe-bottom {
+  padding-bottom: var(--sab);
+}
+
+/* 左侧安全区域 */
+.safe-left {
+  padding-left: var(--sal);
+}
+
+/* 所有安全区域 */
+.safe-all {
+  padding-top: var(--sat);
+  padding-right: var(--sar);
+  padding-bottom: var(--sab);
+  padding-left: var(--sal);
+}
+
+/* 底部安全区域高度 */
+.h-safe-bottom {
+  height: var(--sab);
+}
+
+/* ==================== 触摸优化 ==================== */
+
+/* 触摸目标最小尺寸 */
+@media (max-width: 768px) {
+  button,
+  a,
+  input[type='checkbox'],
+  input[type='radio'],
+  .touchable {
+    min-width: var(--touch-target-min);
+    min-height: var(--touch-target-min);
+  }
+}
+
+/* 触摸反馈 */
+@media (max-width: 768px) {
+  button:active,
+  .touchable:active {
+    transform: scale(0.97);
+    transition: transform 0.1s ease;
+  }
+
+  /* 禁用某些元素的触摸反馈 */
+  button:disabled:active,
+  .no-touch-feedback:active {
+    transform: none;
+  }
+}
+
+/* 触摸涟漪效果 */
+.touch-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.touch-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.touch-ripple:active::after {
+  width: 200px;
+  height: 200px;
+}
+
+/* ==================== 滚动优化 ==================== */
+
+/* 惯性滚动 */
+.momentum-scroll {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+/* 隐藏滚动条 (移动端) */
+@media (max-width: 768px) {
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* 自定义滚动条 (移动端细一点) */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* ==================== 输入框优化 ==================== */
+
+/* 移动端输入框 */
+@media (max-width: 768px) {
+  input,
+  textarea {
+    font-size: 16px; /* 防止 iOS 自动缩放 */
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* 禁用 iOS 输入框阴影 */
+  input[type='text'],
+  input[type='search'],
+  input[type='email'],
+  input[type='password'],
+  textarea {
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+}
+
+/* 输入框聚焦时 */
+@media (max-width: 768px) {
+  input:focus,
+  textarea:focus {
+    font-size: 16px; /* 防止缩放 */
+  }
+}
+
+/* ==================== 移动端布局 ==================== */
+
+/* 全屏容器 */
+.mobile-fullscreen {
+  width: 100vw;
+  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100); /* 考虑移动端地址栏 */
+  overflow: hidden;
+}
+
+/* 移动端固定头部 */
+.mobile-header-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding-top: var(--sat);
+}
+
+/* 移动端固定底部 */
+.mobile-footer-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding-bottom: var(--sab);
+}
+
+/* 移动端内容区域 */
+.mobile-content {
+  padding-top: 56px; /* 头部高度 */
+  padding-bottom: 72px; /* 底部高度 */
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ==================== 移动端字体大小 ==================== */
+
+@media (max-width: 768px) {
+  .text-mobile-xs {
+    font-size: var(--font-size-mobile-xs);
+  }
+
+  .text-mobile-sm {
+    font-size: var(--font-size-mobile-sm);
+  }
+
+  .text-mobile-base {
+    font-size: var(--font-size-mobile-base);
+  }
+
+  .text-mobile-lg {
+    font-size: var(--font-size-mobile-lg);
+  }
+
+  .text-mobile-xl {
+    font-size: var(--font-size-mobile-xl);
+  }
+}
+
+/* ==================== 手势相关 ==================== */
+
+/* 禁止长按菜单 */
+.no-context-menu {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 可滑动提示 */
+.swipeable::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+/* ==================== 移动端模态框 ==================== */
+
+@media (max-width: 768px) {
+  /* 全屏模态框 */
+  .mobile-modal-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: white;
+    padding: var(--sat) 0 var(--sab) 0;
+  }
+
+  /* 底部弹出模态框 */
+  .mobile-modal-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: white;
+    border-radius: 16px 16px 0 0;
+    padding-bottom: var(--sab);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* ==================== 移动端卡片 ==================== */
+
+@media (max-width: 768px) {
+  .mobile-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .mobile-card-list {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .mobile-card-list-item {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+  }
+
+  .mobile-card-list-item:last-child {
+    border-bottom: none;
+  }
+
+  .mobile-card-list-item:active {
+    background-color: #f7f7f7;
+  }
+}
+
+/* ==================== 移动端导航栏 ==================== */
+
+@media (max-width: 768px) {
+  .mobile-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: white;
+    border-top: 1px solid #e5e5e5;
+    padding: 8px 0;
+    padding-bottom: calc(8px + var(--sab));
+  }
+
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    color: #666;
+    transition: color 0.2s;
+  }
+
+  .mobile-nav-item.active {
+    color: #1a73e8;
+  }
+
+  .mobile-nav-item:active {
+    opacity: 0.6;
+  }
+}
+
+/* ==================== 移动端下拉刷新 ==================== */
+
+.pull-to-refresh {
+  position: relative;
+}
+
+.pull-to-refresh-indicator {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: top 0.2s;
+}
+
+.pull-to-refresh.pulling .pull-to-refresh-indicator {
+  top: 10px;
+}
+
+/* ==================== 移动端加载状态 ==================== */
+
+@media (max-width: 768px) {
+  .mobile-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+  }
+
+  .mobile-loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #1a73e8;
+    border-radius: 50%;
+    animation: mobile-spin 0.8s linear infinite;
+  }
+}
+
+@keyframes mobile-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==================== 移动端骨架屏 ==================== */
+
+@media (max-width: 768px) {
+  .mobile-skeleton {
+    background: linear-gradient(
+      90deg,
+      #f0f0f0 25%,
+      #e0e0e0 50%,
+      #f0f0f0 75%
+    );
+    background-size: 200% 100%;
+    animation: mobile-skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: 4px;
+  }
+}
+
+@keyframes mobile-skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ==================== 响应式工具类 ==================== */
+
+/* 仅移动端显示 */
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+/* 仅桌面端显示 */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+/* 仅平板端显示 */
+@media (max-width: 768px), (min-width: 1024px) {
+  .tablet-only {
+    display: none !important;
+  }
+}

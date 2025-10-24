@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npm install)",
+      "Bash(npm run dev:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(wmic process where:*)",
+      "WebSearch",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(cmd /c:*)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Read(//c/Users/laiye1/CLionProjects/**)",
+      "Bash(mkdir:*)",
+      "Bash(npx react-native:*)",
+      "Bash(tree:*)",
+      "Bash(dir:*)",
+      "Bash(pip install:*)",
+      "Bash(pip3 install:*)",
+      "Bash(python -m pip:*)",
+      "Bash(py:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
