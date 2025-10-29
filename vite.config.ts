@@ -1,30 +1,30 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
-import { visualizer } from 'rollup-plugin-visualizer'
-import { compression } from 'vite-plugin-compression2'
+// import { visualizer } from 'rollup-plugin-visualizer'
+// import { compression } from 'vite-plugin-compression2'
 
 export default defineConfig({
   plugins: [
     react(),
-    // Gzip compression
-    compression({
-      algorithm: 'gzip',
-      exclude: [/\.(br)$/, /\.(gz)$/],
-    }),
-    // Brotli compression for better compression ratio
-    compression({
-      algorithm: 'brotliCompress',
-      exclude: [/\.(br)$/, /\.(gz)$/],
-    }),
-    // Bundle analyzer (only in build mode with ANALYZE=true)
-    process.env.ANALYZE === 'true' &&
-      visualizer({
-        open: true,
-        filename: 'dist/stats.html',
-        gzipSize: true,
-        brotliSize: true,
-      }),
+    // Gzip compression - disabled for now
+    // compression({
+    //   algorithm: 'gzip',
+    //   exclude: [/\.(br)$/, /\.(gz)$/],
+    // }),
+    // Brotli compression for better compression ratio - disabled for now
+    // compression({
+    //   algorithm: 'brotliCompress',
+    //   exclude: [/\.(br)$/, /\.(gz)$/],
+    // }),
+    // Bundle analyzer (only in build mode with ANALYZE=true) - disabled for now
+    // process.env.ANALYZE === 'true' &&
+    //   visualizer({
+    //     open: true,
+    //     filename: 'dist/stats.html',
+    //     gzipSize: true,
+    //     brotliSize: true,
+    //   }),
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -38,18 +38,18 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: process.env.NODE_ENV === 'development',
-    // Use esbuild for faster builds (terser for production)
-    minify: process.env.NODE_ENV === 'production' ? 'terser' : 'esbuild',
-    terserOptions: {
-      compress: {
-        drop_console: process.env.NODE_ENV === 'production',
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug'],
-      },
-      format: {
-        comments: false,
-      },
-    },
+    // Use esbuild for faster builds
+    minify: 'esbuild',
+    // terserOptions: {
+    //   compress: {
+    //     drop_console: process.env.NODE_ENV === 'production',
+    //     drop_debugger: true,
+    //     pure_funcs: ['console.log', 'console.info', 'console.debug'],
+    //   },
+    //   format: {
+    //     comments: false,
+    //   },
+    // },
     rollupOptions: {
       output: {
         // Asset file naming

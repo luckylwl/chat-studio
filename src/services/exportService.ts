@@ -867,8 +867,11 @@ class ExportService extends EventEmitter {
   }
 }
 
-export default ExportService.getInstance()
+const exportService = ExportService.getInstance()
+
+export default exportService
 export {
+  exportService,
   ExportService,
   type ExportJob,
   type ExportFormat,
