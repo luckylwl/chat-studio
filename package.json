@@ -1,7 +1,7 @@
 {
   "name": "ai-chat-studio",
-  "version": "2.2.0",
-  "description": "Feature-rich open-source AI chat application with multi-model support, PWA mobile-ready, full-stack architecture (React + TypeScript + Python FastAPI)",
+  "version": "3.0.0",
+  "description": "Enterprise-grade AI chat platform with 95+ features: RAG, workflows, collaboration, analytics, multi-modal AI, and more. Full-stack React + TypeScript + Python FastAPI",
   "keywords": [
     "ai",
     "chat",

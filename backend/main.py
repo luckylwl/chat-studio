@@ -11,20 +11,24 @@ AI Chat Studio - FastAPI Backend
 - 缓存系统
 """
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
 import uvicorn
 import asyncio
 import json
 import jwt
 import hashlib
 import os
+import time
 from enum import Enum
 from dotenv import load_dotenv
+from collections import defaultdict
 
 # 加载环境变量
 load_dotenv()
@@ -36,11 +40,102 @@ if not SECRET_KEY:
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
+# ==================== API 限流中间件 ====================
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    """
+    API 限流中间件
+    - 基于 IP 地址的速率限制
+    - 滑动窗口算法
+    - 可配置限流规则
+    """
+    def __init__(self, app, rate_limit: int = 100, time_window: int = 60):
+        super().__init__(app)
+        self.rate_limit = rate_limit  # 时间窗口内的最大请求数
+        self.time_window = time_window  # 时间窗口（秒）
+        self.requests: Dict[str, List[float]] = defaultdict(list)
+
+    async def dispatch(self, request: Request, call_next):
+        # 获取客户端 IP
+        client_ip = request.client.host if request.client else "unknown"
+
+        # 排除某些端点（健康检查、文档等）
+        if request.url.path in ["/health", "/docs", "/redoc", "/openapi.json"]:
+            return await call_next(request)
+
+        current_time = time.time()
+
+        # 清理过期的请求记录
+        self.requests[client_ip] = [
+            req_time for req_time in self.requests[client_ip]
+            if current_time - req_time < self.time_window
+        ]
+
+        # 检查是否超过限流
+        if len(self.requests[client_ip]) >= self.rate_limit:
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "error": "Too Many Requests",
+                    "message": f"速率限制: 每{self.time_window}秒最多{self.rate_limit}个请求",
+                    "retry_after": self.time_window
+                }
+            )
+
+        # 记录当前请求
+        self.requests[client_ip].append(current_time)
+
+        # 添加限流头部
+        response = await call_next(request)
+        response.headers["X-RateLimit-Limit"] = str(self.rate_limit)
+        response.headers["X-RateLimit-Remaining"] = str(
+            self.rate_limit - len(self.requests[client_ip])
+        )
+        response.headers["X-RateLimit-Reset"] = str(
+            int(current_time + self.time_window)
+        )
+
+        return response
+
+# ==================== 请求日志中间件 ====================
+
+class LoggingMiddleware(BaseHTTPMiddleware):
+    """
+    请求日志中间件
+    - 记录所有API请求
+    - 记录响应时间
+    - 记录错误
+    """
+    async def dispatch(self, request: Request, call_next):
+        start_time = time.time()
+
+        # 记录请求信息
+        print(f"📥 {request.method} {request.url.path}")
+
+        try:
+            response = await call_next(request)
+            process_time = time.time() - start_time
+
+            # 添加处理时间头部
+            response.headers["X-Process-Time"] = f"{process_time:.4f}"
+
+            # 记录响应信息
+            status_emoji = "✅" if response.status_code < 400 else "❌"
+            print(f"{status_emoji} {request.method} {request.url.path} - {response.status_code} - {process_time:.4f}s")
+
+            return response
+        except Exception as e:
+            process_time = time.time() - start_time
+            print(f"❌ {request.method} {request.url.path} - ERROR - {process_time:.4f}s - {str(e)}")
+            raise
+
+# ==================== FastAPI 应用配置 ====================
+
 # 创建FastAPI应用
 app = FastAPI(
     title="AI Chat Studio API",
     description="完整的AI聊天应用后端服务",
-    version="2.0.0"
+    version="2.3.0"
 )
 
 # CORS配置
@@ -53,6 +148,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 添加请求日志中间件
+app.add_middleware(LoggingMiddleware)
+
+# 添加API限流中间件 (每60秒最多100个请求)
+RATE_LIMIT = int(os.getenv("RATE_LIMIT", "100"))
+RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))
+app.add_middleware(RateLimitMiddleware, rate_limit=RATE_LIMIT, time_window=RATE_LIMIT_WINDOW)
 
 # 安全认证
 security = HTTPBearer()
@@ -394,17 +497,82 @@ async def chat(
 
 # ==================== WebSocket端点 ====================
 
+async def verify_websocket_token(token: str) -> Optional[str]:
+    """验证 WebSocket Token 并返回 user_id"""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        return user_id
+    except (jwt.ExpiredSignatureError, jwt.JWTError):
+        return None
+
 @app.websocket("/ws/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, user_id: str):
-    """WebSocket实时通信"""
-    await manager.connect(user_id, websocket)
+async def websocket_endpoint(websocket: WebSocket, user_id: str, token: Optional[str] = None):
+    """
+    WebSocket实时通信 (带认证)
+
+    使用方式:
+    1. 通过查询参数传递 token: ws://host/ws/user123?token=xxx
+    2. 通过第一条消息传递 token: {"type": "auth", "token": "xxx"}
+    """
+    # 先接受连接
+    await websocket.accept()
+
+    authenticated = False
+    authenticated_user_id = None
+
+    # 方式1: 通过查询参数认证
+    if token:
+        authenticated_user_id = await verify_websocket_token(token)
+        if authenticated_user_id == user_id:
+            authenticated = True
+            await manager.connect(user_id, websocket)
+            await manager.send_message(user_id, {
+                "type": "auth_success",
+                "message": "认证成功"
+            })
 
     try:
         while True:
             # 接收消息
             data = await websocket.receive_json()
-
             message_type = data.get("type")
+
+            # 方式2: 通过首条消息认证
+            if message_type == "auth" and not authenticated:
+                auth_token = data.get("token")
+                if auth_token:
+                    authenticated_user_id = await verify_websocket_token(auth_token)
+                    if authenticated_user_id == user_id:
+                        authenticated = True
+                        await manager.connect(user_id, websocket)
+                        await manager.send_message(user_id, {
+                            "type": "auth_success",
+                            "message": "认证成功"
+                        })
+                    else:
+                        await manager.send_message(user_id, {
+                            "type": "auth_failed",
+                            "message": "认证失败: Token 无效或已过期"
+                        })
+                        await websocket.close(code=4001)
+                        return
+                else:
+                    await manager.send_message(user_id, {
+                        "type": "auth_failed",
+                        "message": "认证失败: 缺少 token"
+                    })
+                    await websocket.close(code=4001)
+                    return
+                continue
+
+            # 检查是否已认证
+            if not authenticated:
+                await websocket.send_json({
+                    "type": "error",
+                    "message": "未认证，请先发送认证消息"
+                })
+                continue
 
             if message_type == "ping":
                 # 心跳检测
@@ -449,7 +617,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
 
 @app.get("/api/stats")
 async def get_stats(user_id: str = Depends(get_current_user)):
-    """获取用户统计信息"""
+    """获取用户基础统计信息"""
     user_conversations = conversations_db.get(user_id, [])
 
     total_messages = sum(len(conv.messages) for conv in user_conversations)
@@ -465,6 +633,117 @@ async def get_stats(user_id: str = Depends(get_current_user)):
         "average_messages_per_conversation": (
             total_messages / len(user_conversations) if user_conversations else 0
         )
+    }
+
+@app.get("/api/stats/detailed")
+async def get_detailed_stats(user_id: str = Depends(get_current_user)):
+    """
+    获取用户详细统计信息
+
+    包含:
+    - 模型使用统计
+    - 时间分布
+    - 消息角色分布
+    - Token 消耗趋势
+    - 对话活跃度
+    """
+    user_conversations = conversations_db.get(user_id, [])
+
+    # 基础统计
+    total_conversations = len(user_conversations)
+    total_messages = sum(len(conv.messages) for conv in user_conversations)
+    total_tokens = sum(
+        sum(msg.tokens or 0 for msg in conv.messages)
+        for conv in user_conversations
+    )
+
+    # 模型使用统计
+    model_usage = defaultdict(int)
+    for conv in user_conversations:
+        model_usage[conv.model] += 1
+
+    # 消息角色分布
+    role_distribution = defaultdict(int)
+    for conv in user_conversations:
+        for msg in conv.messages:
+            role_distribution[msg.role] += 1
+
+    # 时间分布 (按小时)
+    hourly_distribution = defaultdict(int)
+    daily_messages = defaultdict(int)
+
+    for conv in user_conversations:
+        for msg in conv.messages:
+            msg_time = datetime.fromtimestamp(msg.timestamp / 1000)
+            hourly_distribution[msg_time.hour] += 1
+            day_key = msg_time.strftime("%Y-%m-%d")
+            daily_messages[day_key] += 1
+
+    # Token 消耗趋势 (最近 7 天)
+    token_trend = defaultdict(int)
+    now = datetime.utcnow()
+    for conv in user_conversations:
+        for msg in conv.messages:
+            if msg.tokens:
+                msg_time = datetime.fromtimestamp(msg.timestamp / 1000)
+                days_ago = (now - msg_time).days
+                if days_ago < 7:
+                    date_key = msg_time.strftime("%Y-%m-%d")
+                    token_trend[date_key] += msg.tokens
+
+    # 对话活跃度 (最近更新的对话)
+    active_conversations = sorted(
+        user_conversations,
+        key=lambda c: c.updatedAt,
+        reverse=True
+    )[:10]
+
+    active_conv_stats = [
+        {
+            "id": conv.id,
+            "title": conv.title,
+            "message_count": len(conv.messages),
+            "last_updated": conv.updatedAt,
+            "model": conv.model
+        }
+        for conv in active_conversations
+    ]
+
+    # 平均响应长度
+    assistant_messages = [
+        msg for conv in user_conversations
+        for msg in conv.messages
+        if msg.role == MessageRole.ASSISTANT
+    ]
+    avg_response_length = (
+        sum(len(msg.content) for msg in assistant_messages) / len(assistant_messages)
+        if assistant_messages else 0
+    )
+
+    return {
+        "basic": {
+            "total_conversations": total_conversations,
+            "total_messages": total_messages,
+            "total_tokens": total_tokens,
+            "average_messages_per_conversation": (
+                total_messages / total_conversations if total_conversations else 0
+            )
+        },
+        "model_usage": dict(model_usage),
+        "role_distribution": dict(role_distribution),
+        "hourly_distribution": dict(hourly_distribution),
+        "daily_messages_last_30_days": dict(sorted(daily_messages.items(), reverse=True)[:30]),
+        "token_trend_last_7_days": dict(sorted(token_trend.items())),
+        "active_conversations": active_conv_stats,
+        "insights": {
+            "average_response_length": round(avg_response_length, 2),
+            "most_used_model": max(model_usage.items(), key=lambda x: x[1])[0] if model_usage else None,
+            "peak_hour": max(hourly_distribution.items(), key=lambda x: x[1])[0] if hourly_distribution else None,
+            "total_conversations_this_week": sum(
+                1 for conv in user_conversations
+                if (now - datetime.fromtimestamp(conv.createdAt / 1000)).days < 7
+            )
+        }
     }
 
 # ==================== 主函数 ====================

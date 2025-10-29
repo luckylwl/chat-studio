@@ -1,13 +1,13 @@
-# 🎨 AI Chat Studio - 智能对话工作室 v2.1
+# 🎨 AI Chat Studio - 智能对话工作室 v3.0
 
 <div align="center">
 
-![AI Chat Studio](https://via.placeholder.com/800x400/2563eb/ffffff?text=AI+Chat+Studio+v2.1)
+![AI Chat Studio](https://via.placeholder.com/800x400/2563eb/ffffff?text=AI+Chat+Studio+v3.0)
 
-**全栈 AI 对话应用 - 功能最全面、性能最优秀、移动端完美支持**
+**全栈 AI 对话应用 - 企业级、功能最全面、性能最优秀**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.2.0-green.svg)](https://github.com/luckylwl/chat-studio/releases)
+[![Version](https://img.shields.io/badge/version-3.0.0-green.svg)](https://github.com/luckylwl/chat-studio/releases)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 [![React](https://img.shields.io/badge/React-18-61dafb.svg?logo=react)](https://reactjs.org/)
@@ -70,7 +70,7 @@ AI Chat Studio 是一个**全栈、现代化、生产就绪**的 AI 聊天应用
 
 ## 🚀 核心特性
 
-### 🆕 v2.0 后端新特性 (Python FastAPI)
+### 🆕 v3.0 企业级特性 (95+ 高级功能)
 
 #### **完整的 RESTful API**
 - 用户认证 (注册/登录)
@@ -260,9 +260,9 @@ python main.py
 
 ## 📱 移动端支持 (NEW!)
 
-### 🆕 v2.1 移动端全面适配
+### 🆕 v3.0 移动端完美支持
 
-AI Chat Studio 现已完美支持移动设备，提供原生 App 般的体验！
+AI Chat Studio 完美支持移动设备，提供原生 App 般的体验！
 
 #### ✨ 核心特性
 

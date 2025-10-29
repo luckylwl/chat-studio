@@ -229,3 +229,13 @@ backend/*.env
 
 # Claude Code local settings
 .claude/
+
+# Draft and WIP files
+backend/draft/
+docs/archive/
+*.draft.md
+*.wip.md
+
+# Cleanup scripts
+cleanup-docs.bat
+cleanup-*.bat
