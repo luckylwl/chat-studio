@@ -30,7 +30,13 @@
     "**/__tests__/**",
     "**/testUtils.tsx",
     "**/bundleAnalysis.ts",
-    "**/test-setup.ts"
+    "**/test-setup.ts",
+    "**/draft/**",
+    "src/components/draft/**",
+    "src/services/draft/**",
+    "src/hooks/draft/**",
+    "src/plugins/draft/**",
+    "src/stories/draft/**"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

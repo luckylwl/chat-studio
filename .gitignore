@@ -233,6 +233,11 @@ backend/*.env
 # Draft and WIP files
 backend/draft/
 docs/archive/
+src/components/draft/
+src/services/draft/
+src/hooks/draft/
+src/plugins/draft/
+src/stories/draft/
 *.draft.md
 *.wip.md
 
